@@ -43,8 +43,9 @@ export function IncomeCategory({
   onBudgetAction,
   onReorder,
   onShowActivity,
-}: IncomeCategoryProps) {
-  const { dragRef } = useDraggable({
+  onShowCategoryTransactions,
+}) {
+  let { dragRef } = useDraggable({
     type: 'income-category',
     onDragChange,
     item: cat,
@@ -79,6 +80,7 @@ export function IncomeCategory({
         onEditName={onEditName}
         onSave={onSave}
         onDelete={onDelete}
+        onShowCategoryTransactions={onShowCategoryTransactions}
       />
       <RenderMonths
         component={MonthComponent}

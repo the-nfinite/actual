@@ -29,6 +29,7 @@ type SidebarCategoryProps = {
   onSave: (category: CategoryEntity) => void;
   onDelete: (id: string) => Promise<void>;
   onHideNewCategory?: () => void;
+  onShowCategoryTransactions?: (id: string) => void;
 };
 
 export function SidebarCategory({
@@ -44,7 +45,8 @@ export function SidebarCategory({
   onSave,
   onDelete,
   onHideNewCategory,
-}: SidebarCategoryProps) {
+  onShowCategoryTransactions,
+}) {
   const temporary = category.id === 'new';
   const [menuOpen, setMenuOpen] = useState(false);
   const triggerRef = useRef(null);
@@ -100,6 +102,8 @@ export function SidebarCategory({
                 onDelete(category.id);
               } else if (type === 'toggle-visibility') {
                 onSave({ ...category, hidden: !category.hidden });
+              } else if (type === 'show') {
+                onShowCategoryTransactions(category.id);
               }
               setMenuOpen(false);
             }}
@@ -110,6 +114,7 @@ export function SidebarCategory({
                 text: category.hidden ? 'Show' : 'Hide',
               },
               { name: 'delete', text: 'Delete' },
+              { name: 'show', text: 'Show all transactions' },
             ]}
           />
         </Popover>
