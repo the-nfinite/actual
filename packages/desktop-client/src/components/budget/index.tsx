@@ -276,6 +276,19 @@ function BudgetInner(props: BudgetInnerProps) {
     dispatch(applyBudgetAction(month, type, args));
   };
 
+  const onShowCategoryTransactions = (categoryId) => {
+    const conditions = [
+      { field: 'category', op: 'is', value: categoryId, type: 'id' },
+    ];
+    navigate('/accounts', {
+      state: {
+        goBack: true,
+        conditions,
+        categoryId,
+      },
+    });
+  };
+
   const onShowActivity = (categoryId, month) => {
     const conditions = [
       { field: 'category', op: 'is', value: categoryId, type: 'id' },
@@ -395,6 +408,7 @@ function BudgetInner(props: BudgetInnerProps) {
           onSaveGroup={onSaveGroup}
           onBudgetAction={onBudgetAction}
           onShowActivity={onShowActivity}
+          onShowCategoryTransactions={onShowCategoryTransactions}
           onReorderCategory={onReorderCategory}
           onReorderGroup={onReorderGroup}
         />
