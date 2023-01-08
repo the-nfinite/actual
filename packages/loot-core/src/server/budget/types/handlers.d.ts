@@ -74,4 +74,9 @@ export interface BudgetHandlers {
     month: string;
     category: string; //category id
   }) => Promise<void>;
+
+  'budget/zero-balance': (arg: {
+    month: string;
+    category: string; //category id
+  }) => Promise<void>;
 }

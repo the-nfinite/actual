@@ -38,6 +38,12 @@ export function BalanceMovementMenu({
           }}
           onTransfer={() => setMenu('transfer')}
           onCover={() => setMenu('cover')}
+          onZero={() => {
+            onBudgetAction(month, 'zero-balance', {
+              category: categoryId,
+            });
+            _onClose();
+          }}
         />
       )}
 
