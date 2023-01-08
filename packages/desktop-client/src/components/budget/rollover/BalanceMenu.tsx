@@ -14,6 +14,7 @@ type BalanceMenuProps = Omit<
   onTransfer: () => void;
   onCarryover: (carryOver: boolean) => void;
   onCover: () => void;
+  onZero: () => void;
 };
 
 export function BalanceMenu({
@@ -21,6 +22,7 @@ export function BalanceMenu({
   onTransfer,
   onCarryover,
   onCover,
+  onZero,
   ...props
 }: BalanceMenuProps) {
   const carryover = useRolloverSheetValue(
@@ -40,6 +42,9 @@ export function BalanceMenu({
             break;
           case 'cover':
             onCover?.();
+            break;
+          case 'zero':
+            onZero?.();
             break;
           default:
             throw new Error(`Unrecognized menu option: ${name}`);
@@ -67,6 +72,10 @@ export function BalanceMenu({
           text: carryover
             ? 'Remove overspending rollover'
             : 'Rollover overspending',
+        },
+        {
+          name: 'zero',
+          text: 'Balance to Zero',
         },
       ]}
     />
