@@ -328,7 +328,7 @@ export async function balanceCategoryToZero({ month, category }) {
   await setBudget({
     category: category,
     month,
-    amount: curBudgeted - leftover
+    amount: curBudgeted - leftover,
   });
 }
 

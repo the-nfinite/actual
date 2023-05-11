@@ -86,7 +86,7 @@ export function applyBudgetAction(month, type, args) {
       case 'zero-balance': {
         await send('budget/zero-balance', {
           month,
-          category: args.category
+          category: args.category,
         });
         break;
       }
