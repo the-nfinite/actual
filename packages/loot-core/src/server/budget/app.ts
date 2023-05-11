@@ -68,7 +68,7 @@ app.method(
 );
 app.method(
   'budget/zero-balance',
-  mutator(undoable(actions.balanceCategoryToZero))
+  mutator(undoable(actions.balanceCategoryToZero)),
 );
 
 export default app;
