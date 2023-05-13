@@ -4,27 +4,37 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import { runAll } from '../util';
 
-export function incomeVsExpenseByDate(start, end, conditions = []) {
+export function incomeVsExpenseByDate(
+  start,
+  end,
+  conditions = [],
+  conditionsOp,
+) {
   return async (spreadsheet, setData) => {
     let { filters } = await send('make-filters-from-conditions', {
       conditions: conditions.filter(cond => !cond.customName),
     });
+    const conditionsOpKey = conditionsOp === 'or' ? '$or' : '$and';
 
-    let categoryQuery = q('transactions').filter({
-      $and: [
-        ...filters,
-        { date: { $transform: '$month', $gte: start } },
-        { date: { $transform: '$month', $lte: end } },
-      ],
-      'account.offbudget': false,
-      $or: [
-        {
-          'payee.transfer_acct.offbudget': true,
-          'payee.transfer_acct': null,
-        },
-      ],
-      'category.is_income': false,
-    });
+    let categoryQuery = q('transactions')
+      .filter({
+        [conditionsOpKey]: [...filters],
+      })
+      .filter({
+        $and: [
+          ...filters,
+          { date: { $transform: '$month', $gte: start } },
+          { date: { $transform: '$month', $lte: end } },
+        ],
+        'account.offbudget': false,
+        $or: [
+          {
+            'payee.transfer_acct.offbudget': true,
+            'payee.transfer_acct': null,
+          },
+        ],
+        'category.is_income': false,
+      });
     function categories() {
       return categoryQuery
         .groupBy('category.name')
@@ -47,14 +57,18 @@ export function incomeVsExpenseByDate(start, end, conditions = []) {
         ]);
     }
     function budgetIncome() {
-      let query = q('transactions').filter({
-        $and: [
-          ...filters,
-          { date: { $transform: '$month', $gte: start } },
-          { date: { $transform: '$month', $lte: end } },
-        ],
-        'category.is_income': true,
-      });
+      let query = q('transactions')
+        .filter({
+          [conditionsOpKey]: [...filters],
+        })
+        .filter({
+          $and: [
+            ...filters,
+            { date: { $transform: '$month', $gte: start } },
+            { date: { $transform: '$month', $lte: end } },
+          ],
+          'category.is_income': true,
+        });
       return query
         .groupBy([{ $month: '$date' }, 'payee.name'])
         .select([
@@ -64,19 +78,23 @@ export function incomeVsExpenseByDate(start, end, conditions = []) {
         ]);
     }
 
-    let savingsQuery = q('transactions').filter({
-      $and: [
-        ...filters,
-        { date: { $transform: '$month', $gte: start } },
-        { date: { $transform: '$month', $lte: end } },
-      ],
-      'account.offbudget': true,
-      'payee.transfer_acct': null,
-      $or: [
-        { notes: { $like: '%ontribution%' } }, // 401k contributions
-        { notes: { $like: '%+%' } }, // + Units GOOG
-      ],
-    });
+    let savingsQuery = q('transactions')
+      .filter({
+        [conditionsOpKey]: [...filters],
+      })
+      .filter({
+        $and: [
+          ...filters,
+          { date: { $transform: '$month', $gte: start } },
+          { date: { $transform: '$month', $lte: end } },
+        ],
+        'account.offbudget': true,
+        'payee.transfer_acct': null,
+        $or: [
+          { notes: { $like: '%ontribution%' } }, // 401k contributions
+          { notes: { $like: '%+%' } }, // + Units GOOG
+        ],
+      });
     function savingsAccounts() {
       return savingsQuery
         .groupBy('account.name')
