@@ -178,6 +178,9 @@ function onScrollbarChange() {
     '& ::-webkit-scrollbar-thumb:vertical': {
       backgroundColor: '#d0d0d0',
     },
+    '& ::-webkit-scrollbar-thumb:horizontal': {
+      backgroundColor: '#d0d0d0',
+    },
   };
 
   styles.darkScrollbar = !hiddenScrollbars && {
@@ -186,6 +189,9 @@ function onScrollbarChange() {
       backgroundColor: 'rgba(0, 0, 0, 0)',
     },
     '& ::-webkit-scrollbar-thumb:vertical': {
+      backgroundColor: 'rgba(200, 200, 200, .5)',
+    },
+    '& ::-webkit-scrollbar-thumb:horizontal': {
       backgroundColor: 'rgba(200, 200, 200, .5)',
     },
   };
