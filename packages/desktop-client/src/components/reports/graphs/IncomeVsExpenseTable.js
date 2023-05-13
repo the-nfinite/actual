@@ -125,16 +125,16 @@ export function IncomeVsExpenseTable({ style, start, end, graphData }) {
       <div className="scrollable-table">
         <table>
           <colgroup>
-            <col id="category"></col>
-            <col id="Total"></col>
-            <col id="Average"></col>
+            <col id="category" />
+            <col id="Total" />
+            <col id="Average" />
             {graphData.months.map(m => (
-              <col id={m}></col>
+              <col id={m} />
             ))}
           </colgroup>
           <thead>
             <tr>
-              <th></th>
+              <th />
               <th>Total</th>
               <th>Average</th>
               {graphData.months.map(m => (

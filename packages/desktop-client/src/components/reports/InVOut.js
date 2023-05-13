@@ -7,7 +7,6 @@ import * as monthUtils from 'loot-core/src/shared/months';
 
 import useFilters from '../../hooks/useFilters';
 import { styles } from '../../style';
-import { FilterButton, AppliedFilters } from '../accounts/Filters';
 import { View } from '../common';
 
 import { IncomeVsExpenseTable } from './graphs/IncomeVsExpenseTable';
@@ -18,9 +17,11 @@ import useReport from './useReport';
 function IncomeVsExpense() {
   const {
     filters,
+    conditionsOp,
     onApply: onApplyFilter,
     onDelete: onDeleteFilter,
     onUpdate: onUpdateFilter,
+    onCondOpChange,
   } = useFilters();
 
   const [allMonths, setAllMonths] = useState(null);
@@ -30,8 +31,8 @@ function IncomeVsExpense() {
   const [end, setEnd] = useState(monthUtils.currentDay());
 
   const params = useMemo(
-    () => incomeVsExpenseByDate(start, end, filters),
-    [start, end, filters],
+    () => incomeVsExpenseByDate(start, end, filters, conditionsOp),
+    [start, end, filters, conditionsOp],
   );
   const data = useReport('in-v-out', params);
 
@@ -76,28 +77,14 @@ function IncomeVsExpense() {
         allMonths={allMonths}
         start={monthUtils.getMonth(start)}
         end={monthUtils.getMonth(end)}
-        show1Month
         onChangeDates={onChangeDates}
-        extraButtons={<FilterButton onApply={onApplyFilter} />}
+        onApply={onApplyFilter}
+        filters={filters}
+        onUpdateFilter={onUpdateFilter}
+        onDeleteFilter={onDeleteFilter}
+        conditionsOp={conditionsOp}
+        onCondOpChange={onCondOpChange}
       />
-
-      <View
-        style={{
-          marginTop: -10,
-          paddingLeft: 20,
-          paddingRight: 20,
-          backgroundColor: 'white',
-        }}
-      >
-        {filters.length > 0 && (
-          <AppliedFilters
-            filters={filters}
-            onUpdate={onUpdateFilter}
-            onDelete={onDeleteFilter}
-          />
-        )}
-      </View>
-
       <View
         style={{
           paddingLeft: 20,
