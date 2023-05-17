@@ -11,8 +11,8 @@ export function incomeVsExpenseByDate(start, end, conditions = []) {
     });
 
     let categoryQuery = q('transactions').filter({
-      ...filters,
       $and: [
+        ...filters,
         { date: { $transform: '$month', $gte: start } },
         { date: { $transform: '$month', $lte: end } },
       ],
@@ -48,8 +48,8 @@ export function incomeVsExpenseByDate(start, end, conditions = []) {
     }
     function budgetIncome() {
       let query = q('transactions').filter({
-        ...filters,
         $and: [
+          ...filters,
           { date: { $transform: '$month', $gte: start } },
           { date: { $transform: '$month', $lte: end } },
         ],
@@ -65,8 +65,8 @@ export function incomeVsExpenseByDate(start, end, conditions = []) {
     }
 
     let savingsQuery = q('transactions').filter({
-      ...filters,
       $and: [
+        ...filters,
         { date: { $transform: '$month', $gte: start } },
         { date: { $transform: '$month', $lte: end } },
       ],

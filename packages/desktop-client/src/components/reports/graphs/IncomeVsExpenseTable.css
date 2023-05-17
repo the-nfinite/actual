@@ -1,6 +1,6 @@
 .scrollable-table {
-  overflow:scroll;
-  flex-grow:1;
+  overflow: scroll;
+  flex-grow: 1;
 }
 
 table {
@@ -9,52 +9,96 @@ table {
 
 /* Row Headers */
 thead tr > th {
-  background:#ccc;
+  background: #102a43;
+  color: white;
   position: sticky;
-  padding:.5rem;
-  z-index:2;
+  padding: 0.5rem;
+  z-index: 2;
   top: 0;
 }
 
-/* First column of Head */
-thead tr > :first-child {
-  z-index:3;
-  left:0;
-  top:0;
-  width:200px;
+/* Category column */
+thead tr > :nth-child(-n + 3) {
+  z-index: 3;
+  top: 0;
 }
 
-tbody .tr-cgroup {
+/* Category column */
+thead tr > :nth-child(1) {
+  left: 0;
+  min-width: 200px;
+}
+
+/* Total column */
+thead tr > :nth-child(2) {
+  left: 200px;
+  width: 90px;
+}
+
+/* Average column */
+thead tr > :nth-child(3) {
+  left: 290px;
+  width: 90px;
+}
+
+td.ctavg {
+  background: #fdfdfd;
+}
+
+td.cname {
+  background: #fdfdfd;
+}
+
+td.cgroup {
   background: #f7fafc;
   font-weight: bold;
 }
 
-/* First column of every row */
-tbody tr > :first-child {
-  /*background:#ddd;*/
+td.cgroup-zero {
+  background: #f7fafc;
+  font-weight: bold;
+  color: #e8ecf0;
+}
+
+/* Category column of every row */
+tbody tr > :nth-child(-n + 3) {
   position: sticky;
-  z-index:1;
-  left:0;
+  z-index: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width:200px;
   overflow: hidden;
-  display: block;
+}
+tbody tr > :nth-child(1) {
+  left: 0;
+  min-width: 200px;
   text-align: left;
   padding-left: 10px;
-  background:#fdfdfd;
+}
+tbody tr > :nth-child(2) {
+  left: 200px;
+  width: 90px;
+  text-align: right;
+}
+tbody tr > :nth-child(3) {
+  left: 290px;
+  width: 90px;
+  text-align: right;
 }
 
 td {
-  min-width:90px;
+  min-width: 90px;
   text-align: right;
   padding: 5px;
 }
 
-col:nth-child(odd) {
-  background:#fdfdfd;
+td.zero {
+  color: #e8ecf0;
 }
 
 col:nth-child(even) {
-  background:white;
+  background: #fdfdfd;
+}
+
+col:nth-child(odd) {
+  background: white;
 }

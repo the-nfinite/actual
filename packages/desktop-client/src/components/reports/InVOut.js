@@ -100,9 +100,8 @@ function IncomeVsExpense() {
 
       <View
         style={{
-          backgroundColor: 'white',
-          paddingLeft: 30,
-          paddingRight: 30,
+          paddingLeft: 20,
+          paddingRight: 20,
           overflow: 'auto',
         }}
       >
