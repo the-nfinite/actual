@@ -27,18 +27,19 @@ thead tr > :nth-child(-n + 3) {
 thead tr > :nth-child(1) {
   left: 0;
   min-width: 200px;
+  max-width: 200px;
 }
 
 /* Total column */
 thead tr > :nth-child(2) {
   left: 200px;
-  width: 90px;
+  width: 100px;
 }
 
 /* Average column */
 thead tr > :nth-child(3) {
-  left: 290px;
-  width: 90px;
+  left: 300px;
+  width: 100px;
 }
 
 td.ctavg {
@@ -71,22 +72,23 @@ tbody tr > :nth-child(-n + 3) {
 tbody tr > :nth-child(1) {
   left: 0;
   min-width: 200px;
+  max-width: 200px;
   text-align: left;
   padding-left: 10px;
 }
 tbody tr > :nth-child(2) {
   left: 200px;
-  width: 90px;
+  width: 100px;
   text-align: right;
 }
 tbody tr > :nth-child(3) {
-  left: 290px;
-  width: 90px;
+  left: 300px;
+  width: 100px;
   text-align: right;
 }
 
 td {
-  min-width: 90px;
+  min-width: 100px;
   text-align: right;
   padding: 5px;
 }
