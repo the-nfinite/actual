@@ -8,11 +8,11 @@ import { View } from '../../common';
 
 import './IncomeVsExpenseTable.css';
 
-function TotalAverage({ stats }) {
+function TotalAverage({ stats, cName }) {
   return (
     <>
-      <td>{integerToCurrency(stats.total)}</td>
-      <td>{integerToCurrency(stats.average)}</td>
+      <td className={cName}>{integerToCurrency(stats.total)}</td>
+      <td className={cName}>{integerToCurrency(stats.average)}</td>
     </>
   );
 }
@@ -29,11 +29,18 @@ function _stats(data, monthsCount) {
 function CategoryRow(group, months, category, data) {
   return (
     <tr id={group}>
-      <td>{category}</td>
-      <TotalAverage stats={_stats([...data.values()], months.length)} />
-      {months.map(m => (
-        <td>{data.has(m) ? integerToCurrency(data.get(m)) : '0.00'}</td>
-      ))}
+      <td className="cname">{category}</td>
+      <TotalAverage
+        stats={_stats([...data.values()], months.length)}
+        cName="ctavg"
+      />
+      {months.map(m => {
+        if (data.has(m)) {
+          return <td>{integerToCurrency(data.get(m))}</td>;
+        } else {
+          return <td className="zero">0.00</td>;
+        }
+      })}
     </tr>
   );
 }
@@ -62,18 +69,24 @@ function CategoryGroup(
   return (
     <>
       <tr
-        className="tr-cgroup"
         onClick={() => {
           if (displayedGroups.has(group)) displayedGroups.delete(group);
           else displayedGroups.add(group);
           setDisplayedGroups(new Set(displayedGroups));
         }}
       >
-        <td>{group}</td>
-        <TotalAverage stats={_stats(monthlySums, months.length)} />
-        {monthlySums.map(s => (
-          <td>{integerToCurrency(s)}</td>
-        ))}
+        <td className="cgroup">{group}</td>
+        <TotalAverage
+          stats={_stats(monthlySums, months.length)}
+          cName="cgroup"
+        />
+        {monthlySums.map(s => {
+          if (s) {
+            return <td className="cgroup">{integerToCurrency(s)}</td>;
+          } else {
+            return <td className="cgroup-zero">0.00</td>;
+          }
+        })}
       </tr>
       {displayedGroups.has(group) &&
         [...categories].map(c =>
@@ -130,11 +143,9 @@ export function IncomeVsExpenseTable({ style, start, end, graphData }) {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td style={{ background: 'DarkSeaGreen', fontWeight: 'bold' }}>
-                Expenses
-              </td>
-              <td colSpan="9001" style={{ background: 'DarkSeaGreen' }} />
+            <tr style={{ background: 'LightPink' }}>
+              <td style={{ fontWeight: 'bold' }}>Expenses</td>
+              <td colSpan="9001" />
             </tr>
             {[...graphData.byParent.entries()].map(data => {
               return CategoryGroup(
@@ -147,11 +158,9 @@ export function IncomeVsExpenseTable({ style, start, end, graphData }) {
               );
             })}
 
-            <tr>
-              <td style={{ background: 'DarkSeaGreen', fontWeight: 'bold' }}>
-                Income
-              </td>
-              <td colSpan="9001" style={{ background: 'DarkSeaGreen' }} />
+            <tr style={{ background: 'DarkSeaGreen' }}>
+              <td style={{ fontWeight: 'bold' }}>Income</td>
+              <td colSpan="9001" />
             </tr>
             {CategoryGroup(
               graphData.months,
@@ -162,11 +171,9 @@ export function IncomeVsExpenseTable({ style, start, end, graphData }) {
               setDisplayedGroups,
             )}
 
-            <tr>
-              <td style={{ background: 'DarkSeaGreen', fontWeight: 'bold' }}>
-                Savings
-              </td>
-              <td colSpan="9001" style={{ background: 'DarkSeaGreen' }} />
+            <tr style={{ background: 'LightSteelBlue' }}>
+              <td style={{ fontWeight: 'bold' }}>Savings</td>
+              <td colSpan="9001" />
             </tr>
             {CategoryGroup(
               graphData.months,
