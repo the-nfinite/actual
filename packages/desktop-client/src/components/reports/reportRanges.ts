@@ -163,3 +163,9 @@ export function getLatestRange(offset: number) {
   const start = monthUtils.subMonths(end, offset);
   return [start, end];
 }
+
+export function getYtdRange() {
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.getYearStart(end);
+  return [start, end];
+}

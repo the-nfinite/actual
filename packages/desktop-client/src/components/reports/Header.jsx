@@ -12,6 +12,7 @@ import { FilterButton } from '../filters/FiltersMenu';
 import {
   getFullRange,
   getLatestRange,
+  getYtdRange,
   validateEnd,
   validateStart,
 } from './reportRanges';
@@ -126,6 +127,12 @@ export function Header({
               onPress={() => onChangeDates(...getLatestRange(5))}
             >
               6 months
+            </Button>
+            <Button
+              variant="bare"
+              onPress={() => onChangeDates(...getYtdRange())}
+            >
+              YTD
             </Button>
             <Button
               variant="bare"
