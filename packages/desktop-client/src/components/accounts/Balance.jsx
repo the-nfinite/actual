@@ -204,7 +204,6 @@ export function Balances({
         />
       </Button>
       {showExtraBalances && <MoreBalances balanceQuery={balanceQuery} />}
-
       {selectedItems.size > 0 && (
         <SelectedBalance selectedItems={selectedItems} account={account} />
       )}

@@ -680,11 +680,7 @@ class AccountInternal extends PureComponent<
   };
 
   async calculateBalances() {
-    if (!this.canCalculateBalance()) {
-      return null;
-    }
-
-    const { data } = await runQuery(
+    let { data } = await runQuery(
       this.paged
         ?.getQuery()
         .options({ splits: 'none' })
