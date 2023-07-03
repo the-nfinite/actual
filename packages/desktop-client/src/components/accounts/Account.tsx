@@ -168,7 +168,7 @@ function AllTransactions({
     }
 
     return balances && transactions?.length > 0
-      ? (balances[transactions[0].id]?.balance ?? 0)
+      ? balances[transactions[0].id]?.balance ?? 0
       : 0;
   }, [showBalances, balances, transactions]);
 
@@ -669,14 +669,7 @@ class AccountInternal extends PureComponent<
     const account = this.props.accounts.find(
       account => account.id === accountId,
     );
-    return (
-      account &&
-      this.state.search === '' &&
-      this.state.filterConditions.length === 0 &&
-      (this.state.sort === null ||
-        (this.state.sort.field === 'date' &&
-          this.state.sort.ascDesc === 'desc'))
-    );
+    return account;
   };
 
   async calculateBalances() {
