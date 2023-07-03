@@ -505,17 +505,8 @@ class AccountInternal extends PureComponent {
 
   canCalculateBalance = () => {
     const accountId = this.props.accountId;
-    const account = this.props.accounts.find(
-      account => account.id === accountId,
-    );
-    return (
-      account &&
-      this.state.search === '' &&
-      this.state.filters.length === 0 &&
-      (this.state.sort.length === 0 ||
-        (this.state.sort.field === 'date' &&
-          this.state.sort.ascDesc === 'desc'))
-    );
+    const account = this.props.accounts.find(account => account.id === accountId);
+    return account;
   };
 
   async calculateBalances() {
