@@ -522,9 +522,7 @@ class AccountInternal extends PureComponent<
             transactionsFiltered: isFiltered,
             loading: false,
             workingHard: false,
-            balances: this.state.showBalances
-              ? await this.calculateBalances()
-              : null,
+            balances: await this.calculateBalances(),
             filteredAmount: await this.getFilteredAmount(),
           },
           () => {
