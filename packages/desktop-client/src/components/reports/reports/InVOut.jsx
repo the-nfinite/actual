@@ -5,16 +5,16 @@ import * as d from 'date-fns';
 import { send } from 'loot-core/src/platform/client/fetch';
 import * as monthUtils from 'loot-core/src/shared/months';
 
-import useFilters from '../../hooks/useFilters';
-import { styles } from '../../style';
-import { View } from '../common';
+import { useFilters } from '../../../hooks/useFilters';
+import { styles } from '../../../style';
+import { View } from '../../common/View';
 
-import { IncomeVsExpenseTable } from './graphs/IncomeVsExpenseTable';
-import { incomeVsExpenseByDate } from './graphs/invex-spreadsheet';
-import Header from './Header';
-import useReport from './useReport';
+import { IncomeVsExpenseTable } from '../graphs/IncomeVsExpenseTable';
+import { incomeVsExpenseByDate } from '../graphs/invex-spreadsheet';
+import { Header } from '../Header';
+import { useReport } from '../useReport';
 
-function IncomeVsExpense() {
+export function IncomeVsExpense() {
   const {
     filters,
     conditionsOp,
