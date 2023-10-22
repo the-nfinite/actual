@@ -4,7 +4,7 @@ import * as d from 'date-fns';
 
 import { integerToCurrency } from 'loot-core/src/shared/util';
 
-import { View } from '../../common';
+import { View } from '../../common/View';
 
 import './IncomeVsExpenseTable.css';
 
@@ -36,9 +36,13 @@ function CategoryRow(group, months, category, data) {
       />
       {months.map(m => {
         if (data.has(m)) {
-          return <td>{integerToCurrency(data.get(m))}</td>;
+          return <td key={m}>{integerToCurrency(data.get(m))}</td>;
         } else {
-          return <td className="zero">0.00</td>;
+          return (
+            <td key={m} className="zero">
+              0.00
+            </td>
+          );
         }
       })}
     </tr>
@@ -82,9 +86,17 @@ function CategoryGroup(
         />
         {monthlySums.map(s => {
           if (s) {
-            return <td className="cgroup">{integerToCurrency(s)}</td>;
+            return (
+              <td key={s} className="cgroup">
+                {integerToCurrency(s)}
+              </td>
+            );
           } else {
-            return <td className="cgroup-zero">0.00</td>;
+            return (
+              <td key={s} className="cgroup-zero">
+                0.00
+              </td>
+            );
           }
         })}
       </tr>
@@ -129,7 +141,7 @@ export function IncomeVsExpenseTable({ style, start, end, graphData }) {
             <col id="Total" />
             <col id="Average" />
             {graphData.months.map(m => (
-              <col id={m} />
+              <col key={m} id={m} />
             ))}
           </colgroup>
           <thead>

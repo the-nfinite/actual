@@ -30,7 +30,17 @@ function DetailedBalance({ name, balance, isExactBalance = true }) {
     >
       {name}{' '}
       <PrivacyFilter>
-        <Text style={{ fontWeight: 600 }}>
+        <Text
+          style={{
+            fontWeight: 600,
+            color:
+              balance < 0
+                ? theme.errorText
+                : balance > 0
+                ? theme.noticeTextLight
+                : theme.pageTextSubdued,
+          }}
+        >
           {!isExactBalance && '~ '}
           {format(balance, 'financial')}
         </Text>
