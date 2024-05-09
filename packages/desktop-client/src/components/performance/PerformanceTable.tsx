@@ -154,9 +154,6 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         }}
         key={item.id}
       >
-        <Field width="flex" name="name">
-          <Text>{item.name}</Text>
-        </Field>
         <Field width={200} style={{ textAlign: 'right' }} name="amount">
           <CellValue binding={queries.accountBalance(item)} type="financial" />
         </Field>
@@ -179,6 +176,9 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
               setReconciliationTarget(index, financial);
             }}
           />
+        </Field>{' '}
+        <Field width="flex" name="name">
+          <Text>{item.name}</Text>
         </Field>
       </Row>
     );
@@ -221,7 +221,6 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         <br />
       </div>
       <TableHeader height={ROW_HEIGHT} inset={15}>
-        <Field width="flex">Account</Field>
         <Field width={200} style={{ textAlign: 'right' }}>
           Current Balance
         </Field>
@@ -229,6 +228,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         <Field width={200} style={{ textAlign: 'left' }}>
           New Balance
         </Field>
+        <Field width="flex">Account</Field>
       </TableHeader>
       {/* {reconciles.map(item => renderItem(item))} */}
       <Table
