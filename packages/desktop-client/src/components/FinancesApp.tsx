@@ -36,6 +36,7 @@ import { TransactionEdit } from './mobile/transactions/TransactionEdit';
 import { Modals } from './Modals';
 import { Notifications } from './Notifications';
 import { ManagePayeesPage } from './payees/ManagePayeesPage';
+import { PerformancePage } from './performance/PerformancePage';
 import { Reports } from './reports';
 import { NarrowAlternate, WideComponent } from './responsive';
 import { ScrollProvider } from './ScrollProvider';
@@ -178,6 +179,8 @@ function FinancesAppWithoutContext() {
                     </NarrowNotSupported>
                   }
                 />
+
+                <Route path="/performance" element={<PerformancePage />} />
 
                 <Route path="/payees" element={<ManagePayeesPage />} />
                 <Route path="/rules" element={<ManageRulesPage />} />

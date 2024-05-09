@@ -15,6 +15,7 @@ import { useNavigate } from '../../hooks/useNavigate';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
+import { SvgSun } from '../../icons/v2';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button';
 import { InitialFocus } from '../common/InitialFocus';
@@ -117,6 +118,8 @@ export function Sidebar() {
         <Item title="Reports" Icon={SvgReports} to="/reports" />
 
         <Item title="Schedules" Icon={SvgCalendar} to="/schedules" />
+
+        <Item title="Performance" Icon={SvgSun} to="/performance" />
 
         <Tools />
 
