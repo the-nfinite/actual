@@ -20,6 +20,7 @@ import { useResizeObserver } from '../../hooks/useResizeObserver';
 import { SvgExpandArrow } from '../../icons/v0';
 import { SvgReports, SvgWallet } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
+import { SvgSun } from '../../icons/v2';
 import { useResponsive } from '../../ResponsiveProvider';
 import { styles, theme } from '../../style';
 import { Button } from '../common/Button2';
@@ -153,8 +154,8 @@ export function Sidebar() {
         <View style={{ overflow: 'auto' }}>
           <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
           <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
-
           <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
+          <Item title={t('Performance')} Icon={SvgSun} to="/performance" />
 
           <Tools />
 
