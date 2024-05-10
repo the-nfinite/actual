@@ -25,7 +25,6 @@ import { Input } from '../common/Input';
 import { DateSelect } from '../select/DateSelect';
 import { CellValue } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
-import { electron } from 'process';
 
 type Item = {
   account: AccountEntity;
@@ -65,8 +64,6 @@ async function applyReconciliations(
   };
   await send('transactions-batch-update', changes);
 }
-
-function parseVanguard(paste: string, data, setData) {}
 
 export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
   const format = useFormat();
@@ -158,19 +155,27 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
 
     const copy = [...data];
 
-    function findAccountAndSetValue(search: string, amount: string): number {
-      let modified = -1;
-      if (search.length < 2) return modified; // unlikely
+    function findAccountAndSetValue(
+      search: string,
+      amount: string,
+      sum?: boolean,
+    ): number {
+      let modifiedIndex = -1;
+      if (search.length < 2) return modifiedIndex; // unlikely
       data.forEach((element, i) => {
         if (element.name.indexOf(search) == -1) return;
         if (amount.indexOf('\t') != -1) {
           amount = amount.split('\t')[1];
         }
         const value = amountToInteger(currencyToAmount(amount));
-        copy[i].to_reconcile = value;
-        modified = i;
+        if (sum) {
+          copy[i].to_reconcile += value;
+        } else {
+          copy[i].to_reconcile = value;
+        }
+        modifiedIndex = i;
       });
-      return modified;
+      return modifiedIndex;
     }
 
     // Non-retirement accounts
@@ -185,58 +190,73 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
       }
     });
 
+    // T-Bills (don't use logic, not tracked regularly)
+    // rows.forEach(element => {
+    //   // Example:
+    //   // ['912797KU0', 'U', 'S', 'TREASURY', 'BILL', '0%', '10/17/24', '04/18/24\t',
+    //   //  '$97.69', '+$0.02', '+0.02%', '<coupon>\t<value>']
+    //   const columns = element.trim().split(' ');
+    //   if (columns[4] === 'BILL' || columns[5] === 'BILL') {
+    //     findAccountAndSetValue(
+    //       'Treasury Bills',
+    //       columns[columns.length - 1],
+    //       true,
+    //     );
+    //   }
+    // });
+
     // Retirement accounts (some hard coded stuff, oh well)
     const retirement = rows[rows.length - 1].split(' ');
 
-    // Find Roth
-    let rothStart = retirement.indexOf('Roth');
-    if (rothStart != -1) {
-      while (rothStart < retirement.length) {
-        if (retirement[rothStart][0] === '$') {
-          if (
-            findAccountAndSetValue(
-              retirement[retirement.indexOf('Roth') - 4] + ' Roth', // Name + Roth
-              retirement[rothStart],
-            ) != -1
-          ) {
-            break;
-          }
+    function parseAndProcessAccount(
+      accountType,
+      accountMatch,
+      looksLikeValue,
+      fromIndex?,
+      sum?,
+    ): number {
+      let i = retirement.indexOf(accountType, fromIndex);
+
+      // Not found
+      if (i == -1) return -1;
+
+      while (i < retirement.length) {
+        console.log(accountType, retirement[i]);
+        if (looksLikeValue(retirement[i])) {
+          const accountIndex = findAccountAndSetValue(
+            accountMatch,
+            retirement[i],
+            sum,
+          );
+          if (accountIndex != -1) return accountIndex;
         }
-        rothStart++;
+        i++;
       }
+      return -1;
     }
+
+    // Find Roth
+    parseAndProcessAccount(
+      'Roth',
+      retirement.indexOf('Roth') == -1
+        ? ''
+        : retirement[retirement.indexOf('Roth') - 4] + ' Roth', // Name+Roth
+      (value: string) => {
+        return value[0] === '$';
+      },
+    );
 
     // Find PCRA
-    let selfDirected = retirement.indexOf('Self-Directed');
-    let pcraIndex = -1;
-    if (selfDirected != -1) {
-      while (selfDirected < retirement.length) {
-        if (
-          retirement[selfDirected].indexOf('$') != -1 &&
-          retirement[selfDirected].indexOf('\t') != -1
-        ) {
-          pcraIndex = findAccountAndSetValue('PCRA', retirement[selfDirected]);
-          if (pcraIndex != -1) {
-            break;
-          }
-        }
-        selfDirected++;
-      }
-    }
+    let pcraIndex = parseAndProcessAccount('Self-Directed', 'PCRA', value => {
+      return value.indexOf('$') != -1 && value.indexOf('\t') != -1;
+    });
 
     // Find 401k
-    let four = retirement.indexOf('401(K)');
-    let fourIndex = -1;
-    if (four != -1) {
-      while (four < retirement.length) {
-        if (retirement[four].indexOf('$') != -1) {
-          fourIndex = findAccountAndSetValue('401k Vanguard', retirement[four]);
-          if (fourIndex != -1) break;
-        }
-        four++;
-      }
-    }
+    let fourIndex = parseAndProcessAccount('401(K)', '401k Vanguard', value => {
+      return value.indexOf('$') != -1;
+    });
 
+    // Manually separated PCRA and 401(K)
     if (fourIndex != -1 && pcraIndex != -1) {
       copy[fourIndex].to_reconcile -= copy[pcraIndex].to_reconcile;
     }
