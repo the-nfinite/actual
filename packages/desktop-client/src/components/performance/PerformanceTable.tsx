@@ -25,6 +25,7 @@ import { Input } from '../common/Input';
 import { DateSelect } from '../select/DateSelect';
 import { CellValue } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
+import { electron } from 'process';
 
 type Item = {
   account: AccountEntity;
@@ -142,6 +143,16 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     setData(copy);
   }
 
+  function totalGain() {
+    let gain = 0;
+    data.forEach(element => {
+      if (element.to_reconcile) {
+        gain += element.to_reconcile - element.basis;
+      }
+    }, gain);
+    return gain;
+  }
+
   function parseVanguard() {
     const rows = vanguard.split('Transact');
 
@@ -237,6 +248,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     if (!item) {
       return <Row></Row>;
     }
+    const diff = item.to_reconcile ? item.to_reconcile - item.basis : 0;
     return (
       <Row
         height={ROW_HEIGHT}
@@ -275,7 +287,21 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
               setReconciliationTarget(index, financial);
             }}
           />
-        </Field>{' '}
+        </Field>
+        <Field width={200} name="gain">
+          <Text
+            style={{
+              color:
+                diff < 0
+                  ? theme.errorText
+                  : diff > 0
+                    ? theme.noticeTextLight
+                    : theme.pageTextSub,
+            }}
+          >
+            {diff ? format(diff, 'financial') : ''}
+          </Text>
+        </Field>
         <Field width="flex" name="name">
           <Text>{item.name}</Text>
         </Field>
@@ -283,6 +309,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     );
   }
 
+  const total = totalGain();
   return (
     <View style={{ flex: 1, ...tableStyle }}>
       <div>
@@ -331,6 +358,22 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
 
         <Field width={200} style={{ textAlign: 'left' }}>
           New Balance
+        </Field>
+        <Field width={200} style={{ textAlign: 'left' }}>
+          Gain/Loss
+          <Text
+            style={{
+              color:
+                total < 0
+                  ? theme.errorText
+                  : total > 0
+                    ? theme.noticeTextLight
+                    : theme.pageTextSub,
+            }}
+          >
+            {' '}
+            ({format(total, 'financial')})
+          </Text>
         </Field>
         <Field width="flex">Account</Field>
       </TableHeader>
