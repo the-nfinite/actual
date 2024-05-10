@@ -52,7 +52,7 @@ async function applyReconciliations(
             id: 'temp',
             account: item.id,
             cleared: true,
-            reconciled: false,
+            reconciled: true,
             amount: item.to_reconcile - item.basis,
             date: targetDate,
             payee: targetPayeeId,
@@ -65,6 +65,8 @@ async function applyReconciliations(
   await send('transactions-batch-update', changes);
 }
 
+function parseVanguard(paste: string, data, setData) {}
+
 export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
   const format = useFormat();
   const dateFormat = useDateFormat() || 'MM/dd/yyyy';
@@ -74,6 +76,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
   const [targetDate, setTargetDate] = useState(currentDay());
   const [targetPayee, setTargetPayee] = useState({});
   const retrievedPayees = usePayees();
+  const [vanguard, setVanguard] = useState('');
 
   useEffect(() => {
     const singular = retrievedPayees.filter(
@@ -139,6 +142,97 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     setData(copy);
   }
 
+  function parseVanguard() {
+    const rows = vanguard.split('Transact');
+
+    const copy = [...data];
+
+    function findAccountAndSetValue(search: string, amount: string): number {
+      let modified = -1;
+      if (search.length < 2) return modified; // unlikely
+      data.forEach((element, i) => {
+        if (element.name.indexOf(search) == -1) return;
+        if (amount.indexOf('\t') != -1) {
+          amount = amount.split('\t')[1];
+        }
+        const value = amountToInteger(currencyToAmount(amount));
+        copy[i].to_reconcile = value;
+        modified = i;
+      });
+      return modified;
+    }
+
+    // Non-retirement accounts
+    rows.forEach(element => {
+      // Example:
+      // ['VTSAX', 'VANGUARD', 'TOTAL', 'STOCK', 'MARKET', 'INDEX',
+      //  'ADMIRAL', 'CL\t', '$125.48', '+$0.72', '+0.58%', '<amount>\t<total>']
+      const columns = element.trim().split(' ');
+      findAccountAndSetValue(columns[0], columns[columns.length - 1]);
+      if (columns.length > 1) {
+        findAccountAndSetValue(columns[1], columns[columns.length - 1]);
+      }
+    });
+
+    // Retirement accounts (some hard coded stuff, oh well)
+    const retirement = rows[rows.length - 1].split(' ');
+
+    // Find Roth
+    let rothStart = retirement.indexOf('Roth');
+    if (rothStart != -1) {
+      while (rothStart < retirement.length) {
+        if (retirement[rothStart][0] === '$') {
+          if (
+            findAccountAndSetValue(
+              retirement[retirement.indexOf('Roth') - 4] + ' Roth', // Name + Roth
+              retirement[rothStart],
+            ) != -1
+          ) {
+            break;
+          }
+        }
+        rothStart++;
+      }
+    }
+
+    // Find PCRA
+    let selfDirected = retirement.indexOf('Self-Directed');
+    let pcraIndex = -1;
+    if (selfDirected != -1) {
+      while (selfDirected < retirement.length) {
+        if (
+          retirement[selfDirected].indexOf('$') != -1 &&
+          retirement[selfDirected].indexOf('\t') != -1
+        ) {
+          pcraIndex = findAccountAndSetValue('PCRA', retirement[selfDirected]);
+          if (pcraIndex != -1) {
+            break;
+          }
+        }
+        selfDirected++;
+      }
+    }
+
+    // Find 401k
+    let four = retirement.indexOf('401(K)');
+    let fourIndex = -1;
+    if (four != -1) {
+      while (four < retirement.length) {
+        if (retirement[four].indexOf('$') != -1) {
+          fourIndex = findAccountAndSetValue('401k Vanguard', retirement[four]);
+          if (fourIndex != -1) break;
+        }
+        four++;
+      }
+    }
+
+    if (fourIndex != -1 && pcraIndex != -1) {
+      copy[fourIndex].to_reconcile -= copy[pcraIndex].to_reconcile;
+    }
+
+    setData(copy);
+  }
+
   function renderItem({ item, index }) {
     if (!item) {
       return <Row></Row>;
@@ -159,6 +253,11 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         </Field>
         <Field width={200} style={{ textAlign: 'right' }} name="todo">
           <Input
+            defaultValue={
+              item.to_reconcile != null
+                ? format(item.to_reconcile, 'financial')
+                : ''
+            }
             type="text"
             style={{ backgroundColor: 'transparent' }}
             onFocus={e => e.target.select()}
@@ -218,6 +317,11 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         >
           Submit
         </Button>
+        <br />
+        <div>Paste from Vanguard</div>
+        <Input onChange={e => setVanguard(e.currentTarget.value)} />
+        <Button onClick={() => parseVanguard()}>Parse</Button>
+        <br />
         <br />
       </div>
       <TableHeader height={ROW_HEIGHT} inset={15}>
