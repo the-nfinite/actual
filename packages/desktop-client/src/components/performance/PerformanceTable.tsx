@@ -26,12 +26,17 @@ import { DateSelect } from '../select/DateSelect';
 import { CellValue } from '../spreadsheet/CellValue';
 import { useFormat } from '../spreadsheet/useFormat';
 
+import { q } from 'loot-core/shared/query';
+import { NotesButton } from '../NotesButton';
+
 type Item = {
   account: AccountEntity;
   id: string;
   name: string;
   basis: number | null;
   to_reconcile: number | null;
+  notes: string | null;
+  debug: string;
 };
 
 export const ROW_HEIGHT = 43;
@@ -74,7 +79,9 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
   const [targetDate, setTargetDate] = useState(currentDay());
   const [targetPayee, setTargetPayee] = useState({});
   const retrievedPayees = usePayees();
-  const [vanguard, setVanguard] = useState('');
+  const [inputToParse, setInputToParse] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [debug, setDebug] = useState(false);
 
   useEffect(() => {
     const singular = retrievedPayees.filter(
@@ -91,6 +98,8 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     name: account.name,
     basis: null,
     to_reconcile: null,
+    notes: '',
+    debug: '',
   }));
   if (data.length != transformation.length) {
     setData(transformation);
@@ -101,7 +110,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     if (offBudgetAccounts.length == 0) return;
 
     // Query balances serially
-    function queryResult(index, value) {
+    function basisQueryResult(index, value) {
       // Update basis with result of query
       if (value != null) {
         const copy = [...data];
@@ -110,19 +119,21 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         index += 1; // Prep for next one
       }
 
-      // No more accounts to query
-      if (index >= data.length) return;
+      // No more accounts to query, start the notes queries
+      if (index >= data.length) {
+        return;
+      }
 
       // Query next result
       runQuery(queries.accountBalance(offBudgetAccounts[index]).query).then(
         value => {
-          queryResult(index, value.data);
+          basisQueryResult(index, value.data);
         },
       );
     }
 
     // Kick off queries
-    queryResult(0, null);
+    basisQueryResult(0, null);
   }, [JSON.stringify(offBudgetAccounts)]);
 
   function setReconciliationTarget(index, value) {
@@ -130,6 +141,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     copy[index].to_reconcile = value;
     setData(copy);
   }
+
   function syncBasis() {
     const copy = [...data];
     copy.forEach(item => {
@@ -150,118 +162,84 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
     return gain;
   }
 
-  function parseVanguard() {
-    const rows = vanguard.split('Transact');
+  function parseEachAccount() {
+    data.forEach((row, i) => {
+      if (!row.notes || row.notes.indexOf('### PerformanceRegex\n') == -1) {
+        return;
+      }
 
-    const copy = [...data];
-
-    function findAccountAndSetValue(
-      search: string,
-      amount: string,
-      sum?: boolean,
-    ): number {
-      let modifiedIndex = -1;
-      if (search.length < 2) return modifiedIndex; // unlikely
-      data.forEach((element, i) => {
-        if (element.name.indexOf(search) == -1) return;
-        if (amount.indexOf('\t') != -1) {
-          amount = amount.split('\t')[1];
-        }
-        const value = amountToInteger(currencyToAmount(amount));
-        if (sum) {
-          copy[i].to_reconcile += value;
-        } else {
-          copy[i].to_reconcile = value;
-        }
-        modifiedIndex = i;
-      });
-      return modifiedIndex;
-    }
-
-    // Non-retirement accounts
-    rows.forEach(element => {
+      const lines = row.notes.split('\n');
+      // Looking for
+      // +++`<regex>` or ---`<regex>`
+      // where +++ adds to the reconciliation amount and --- subtracts
+      // Shortcut $$$ to capture currency value => r'([\$\d\.,]+)'
       // Example:
-      // ['VTSAX', 'VANGUARD', 'TOTAL', 'STOCK', 'MARKET', 'INDEX',
-      //  'ADMIRAL', 'CL\t', '$125.48', '+$0.72', '+0.58%', '<amount>\t<total>']
-      const columns = element.trim().split(' ');
-      findAccountAndSetValue(columns[0], columns[columns.length - 1]);
-      if (columns.length > 1) {
-        findAccountAndSetValue(columns[1], columns[columns.length - 1]);
-      }
-    });
-
-    // T-Bills (don't use logic, not tracked regularly)
-    // rows.forEach(element => {
-    //   // Example:
-    //   // ['912797KU0', 'U', 'S', 'TREASURY', 'BILL', '0%', '10/17/24', '04/18/24\t',
-    //   //  '$97.69', '+$0.02', '+0.02%', '<coupon>\t<value>']
-    //   const columns = element.trim().split(' ');
-    //   if (columns[4] === 'BILL' || columns[5] === 'BILL') {
-    //     findAccountAndSetValue(
-    //       'Treasury Bills',
-    //       columns[columns.length - 1],
-    //       true,
-    //     );
-    //   }
-    // });
-
-    // Retirement accounts (some hard coded stuff, oh well)
-    const retirement = rows[rows.length - 1].split(' ');
-
-    function parseAndProcessAccount(
-      accountType,
-      accountMatch,
-      looksLikeValue,
-      fromIndex?,
-      sum?,
-    ): number {
-      let i = retirement.indexOf(accountType, fromIndex);
-
-      // Not found
-      if (i == -1) return -1;
-
-      while (i < retirement.length) {
-        console.log(accountType, retirement[i]);
-        if (looksLikeValue(retirement[i])) {
-          const accountIndex = findAccountAndSetValue(
-            accountMatch,
-            retirement[i],
-            sum,
-          );
-          if (accountIndex != -1) return accountIndex;
+      //   +++`VTSAX.*?\t$$$`
+      let sum = 0;
+      let debug = '';
+      let found = false;
+      lines.forEach(line => {
+        let dir = 1;
+        if (line.indexOf('---`') == 0) {
+          dir = -1;
+        } else if (line.indexOf('+++`') == 0) {
+          dir = 1;
+        } else {
+          // Not a regex line
+          return;
         }
-        i++;
+        line = line.replace('$$$', '([\\$\\d.,]+)');
+        const re_str = line.split('`')[1];
+        const findAll = new RegExp(re_str, 'g');
+        const matches = inputToParse.match(findAll);
+        const re = new RegExp(re_str);
+        matches.forEach(match => {
+          console.log(match);
+          const result = match.match(re);
+          const value = amountToInteger(currencyToAmount(result[1]));
+          sum += dir * value;
+          debug += (dir > 0 ? '+' : '-') + `[${result[0]}] `;
+          found = true;
+        });
+      });
+      if (!found) return;
+
+      const copy = [...data];
+      copy[i].to_reconcile = sum;
+      copy[i].debug = debug;
+      setData(copy);
+    });
+  }
+
+  function getLatestNotesThenParse() {
+    // Query notes serially
+    function notesQueryResult(index, value) {
+      // Update basis with result of query
+      if (value != null) {
+        const notes =
+          value.data && value.data.length > 0 ? value.data[0].note : null;
+        const copy = [...data];
+        copy[index].notes = notes;
+        setData(copy);
+        index += 1; // Prep for next one
       }
-      return -1;
+      // No more accounts to query
+      if (index >= data.length) {
+        setLoading(false);
+        parseEachAccount();
+        return;
+      }
+      // Query next result
+      runQuery(
+        q('notes')
+          .filter({ id: `account-${data[index].id}` })
+          .select('*'),
+      ).then(value => {
+        notesQueryResult(index, value);
+      });
     }
-
-    // Find Roth
-    parseAndProcessAccount(
-      'Roth',
-      retirement.indexOf('Roth') == -1
-        ? ''
-        : retirement[retirement.indexOf('Roth') - 4] + ' Roth', // Name+Roth
-      (value: string) => {
-        return value[0] === '$';
-      },
-    );
-
-    // Find PCRA
-    let pcraIndex = parseAndProcessAccount('Self-Directed', 'PCRA', value => {
-      return value.indexOf('$') != -1 && value.indexOf('\t') != -1;
-    });
-
-    // Find 401k
-    let fourIndex = parseAndProcessAccount('401(K)', '401k Vanguard', value => {
-      return value.indexOf('$') != -1;
-    });
-
-    // Manually separated PCRA and 401(K)
-    if (fourIndex != -1 && pcraIndex != -1) {
-      copy[fourIndex].to_reconcile -= copy[pcraIndex].to_reconcile;
-    }
-
-    setData(copy);
+    setLoading(true);
+    notesQueryResult(0, null);
   }
 
   function renderItem({ item, index }) {
@@ -322,9 +300,16 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
             {diff ? format(diff, 'financial') : ''}
           </Text>
         </Field>
-        <Field width="flex" name="name">
+        <Field width={50}>
+          <NotesButton
+            id={`account-${item.id}`}
+            defaultColor={theme.pageTextSubdued}
+          />
+        </Field>
+        <Field width={debug ? 300 : 'flex'} name="name">
           <Text>{item.name}</Text>
         </Field>
+        <Field width={debug ? 'flex' : 0}>{item.debug}</Field>
       </Row>
     );
   }
@@ -365,9 +350,18 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
           Submit
         </Button>
         <br />
-        <div>Paste from Vanguard</div>
-        <Input onChange={e => setVanguard(e.currentTarget.value)} />
-        <Button onClick={() => parseVanguard()}>Parse</Button>
+        <div>Parseable Input</div>
+        <Input onChange={e => setInputToParse(e.currentTarget.value)} />
+        <Button disabled={loading} onClick={() => getLatestNotesThenParse()}>
+          {loading ? 'Getting latest parsers from account notes' : 'Parse'}
+        </Button>
+        <br />
+        <Input
+          type="checkbox"
+          checked={debug}
+          onChange={() => setDebug(!debug)}
+        />{' '}
+        Debug
         <br />
         <br />
       </div>
@@ -395,9 +389,12 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
             ({format(total, 'financial')})
           </Text>
         </Field>
-        <Field width="flex">Account</Field>
+        <Field width={50} style={{ textAlign: 'center' }}>
+          Notes
+        </Field>
+        <Field width={debug ? 300 : 'flex'}>Account</Field>
+        <Field width={debug ? 'flex' : 0}>Debug</Field>
       </TableHeader>
-      {/* {reconciles.map(item => renderItem(item))} */}
       <Table
         rowHeight={ROW_HEIGHT}
         backgroundColor="transparent"
