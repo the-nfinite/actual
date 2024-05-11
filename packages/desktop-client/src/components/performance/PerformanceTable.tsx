@@ -192,6 +192,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         const re_str = line.split('`')[1];
         const findAll = new RegExp(re_str, 'g');
         const matches = inputToParse.match(findAll);
+        if (!matches) return;
         const re = new RegExp(re_str);
         matches.forEach(match => {
           console.log(match);
