@@ -78,17 +78,18 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
   const [data, setData] = useState([]);
   const [targetDate, setTargetDate] = useState(currentDay());
   const [targetPayee, setTargetPayee] = useState({});
-  const retrievedPayees = usePayees();
   const [inputToParse, setInputToParse] = useState('');
   const [loading, setLoading] = useState(false);
   const [debug, setDebug] = useState(false);
 
+  // Set default Payee to 'Performance'
+  const retrievedPayees = usePayees();
   useEffect(() => {
-    const singular = retrievedPayees.filter(
+    const performancePayee = retrievedPayees.filter(
       payee => payee.name === 'Performance',
     );
-    if (singular.length == 0) return;
-    setTargetPayee(singular[0]);
+    if (performancePayee.length == 0) return;
+    setTargetPayee(performancePayee[0]);
   }, [retrievedPayees]);
 
   // Reinitialize if necessary
@@ -352,7 +353,7 @@ export function PerformanceTable({ offBudgetAccounts, style, tableStyle }) {
         </Button>
         <br />
         <div>Parseable Input</div>
-        <Input onChange={e => setInputToParse(e.currentTarget.value)} />
+        <Input onChange={e => setInputToParse(e.currentTarget.value || null)} />
         <Button disabled={loading} onClick={() => getLatestNotesThenParse()}>
           {loading ? 'Getting latest parsers from account notes' : 'Parse'}
         </Button>
