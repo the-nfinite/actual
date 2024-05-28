@@ -232,7 +232,8 @@ export function _yearRange(
 ): string[] {
   const years: string[] = [];
   let year = yearFromDate(start);
-  while (d.isBefore(_parse(year), _parse(end))) {
+  const endYear = _parse(yearFromDate(end));
+  while (d.isBefore(_parse(year), endYear)) {
     years.push(year);
     year = addYears(year, 1);
   }
@@ -284,7 +285,8 @@ export function _range(
 ): string[] {
   const months: string[] = [];
   let month = monthFromDate(start);
-  while (d.isBefore(_parse(month), _parse(end))) {
+  const endMonth = _parse(monthFromDate(end));
+  while (d.isBefore(_parse(month), endMonth)) {
     months.push(month);
     month = addMonths(month, 1);
   }
