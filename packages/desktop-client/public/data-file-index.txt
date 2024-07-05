@@ -28,3 +28,4 @@ migrations/1704572023730_add_account_sync_source.sql
 migrations/1704572023731_add_missing_goCardless_sync_source.sql
 migrations/1707267033000_reports.sql
 migrations/1712784523000_unhide_input_group.sql
+migrations/1716359441000_include_current.sql

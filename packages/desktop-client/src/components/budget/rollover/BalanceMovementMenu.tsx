@@ -43,7 +43,7 @@ export function BalanceMovementMenu({
             onBudgetAction(month, 'zero-balance', {
               category: categoryId,
             });
-            _onClose();
+            onClose();
           }}
         />
       )}

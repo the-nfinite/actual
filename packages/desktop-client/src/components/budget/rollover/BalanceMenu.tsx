@@ -73,10 +73,14 @@ export function BalanceMenu({
             ? 'Remove overspending rollover'
             : 'Rollover overspending',
         },
-        {
-          name: 'zero',
-          text: 'Balance to Zero',
-        },
+        ...(balance != 0
+          ? [
+              {
+                name: 'zero',
+                text: 'Balance to Zero',
+              },
+            ]
+          : []),
       ]}
     />
   );
