@@ -12,6 +12,7 @@ import {
   SvgWallet,
 } from '../../icons/v1';
 import { SvgCalendar } from '../../icons/v2';
+import { SvgSun } from '../../icons/v2';
 import { View } from '../common/View';
 
 import { Item } from './Item';
@@ -38,6 +39,7 @@ export function PrimaryButtons() {
       <Item title={t('Budget')} Icon={SvgWallet} to="/budget" />
       <Item title={t('Reports')} Icon={SvgReports} to="/reports" />
       <Item title={t('Schedules')} Icon={SvgCalendar} to="/schedules" />
+      <Item title={t('Performance')} Icon={SvgSun} to="/performance" />
       <Item
         title={t('More')}
         Icon={isOpen ? SvgCheveronDown : SvgCheveronRight}
