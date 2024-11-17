@@ -16,17 +16,8 @@ function getNumPossibleMonths(width: number) {
 
   if (estimatedTableWidth < 500) {
     return 1;
-  } else if (estimatedTableWidth < 750) {
-    return 2;
-  } else if (estimatedTableWidth < 1000) {
-    return 3;
-  } else if (estimatedTableWidth < 1250) {
-    return 4;
-  } else if (estimatedTableWidth < 1500) {
-    return 5;
   }
-
-  return 6;
+  return ((estimatedTableWidth - 250) / 250) + 1;
 }
 
 type DynamicBudgetTableInnerProps = {
