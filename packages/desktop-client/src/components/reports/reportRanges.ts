@@ -229,3 +229,9 @@ export function calculateSpendingReportTimeRange({
   );
   return [start, end];
 }
+
+export function getYtdRange() {
+  const end = monthUtils.currentMonth();
+  const start = monthUtils.getYearStart(end);
+  return [start, end];
+}
