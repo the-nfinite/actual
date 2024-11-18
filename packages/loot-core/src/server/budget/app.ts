@@ -70,3 +70,8 @@ app.method(
   'budget/set-carryover',
   mutator(undoable(actions.setCategoryCarryover)),
 );
+app.method(
+  'budget/zero-balance',
+  mutator(undoable(actions.balanceCategoryToZero)),
+);
+
