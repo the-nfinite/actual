@@ -31,6 +31,7 @@ export function BudgetTable(props) {
     onApplyBudgetTemplatesInGroup,
     onReorderCategory,
     onReorderGroup,
+    onShowCategoryTransactions,
     onShowActivity,
     onBudgetAction,
   } = props;
@@ -234,6 +235,7 @@ export function BudgetTable(props) {
               onDeleteGroup={onDeleteGroup}
               onReorderCategory={_onReorderCategory}
               onReorderGroup={_onReorderGroup}
+              onShowCategoryTransactions={onShowCategoryTransactions}
               onBudgetAction={onBudgetAction}
               onShowActivity={onShowActivity}
               onApplyBudgetTemplatesInGroup={onApplyBudgetTemplatesInGroup}

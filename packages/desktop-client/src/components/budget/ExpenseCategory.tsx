@@ -34,6 +34,7 @@ type ExpenseCategoryProps = {
   onDragChange: OnDragChangeCallback<CategoryEntity>;
   onBudgetAction: (month: number, action: string, arg: unknown) => void;
   onShowActivity: (id: string, month: string) => void;
+  onShowCategoryTransactions: (id: string) => void;
   onReorder: OnDropCallback;
 };
 
@@ -49,6 +50,7 @@ export function ExpenseCategory({
   onDelete,
   onBudgetAction,
   onShowActivity,
+  onShowCategoryTransactions,
   onDragChange,
   onReorder,
 }: ExpenseCategoryProps) {
@@ -97,6 +99,7 @@ export function ExpenseCategory({
           onEditName={onEditName}
           onSave={onSave}
           onDelete={onDelete}
+          onShowCategoryTransactions={onShowCategoryTransactions}
         />
 
         <RenderMonths
