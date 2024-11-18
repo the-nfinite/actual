@@ -28,8 +28,16 @@ export function HoldMenu({ onSubmit, onClose }: HoldMenuProps) {
 
   useEffect(() => {
     (async () => {
-      const node = await spreadsheet.get(sheetName, 'to-budget');
-      setAmount(integerToCurrency(Math.max(node.value as number, 0)));
+      // Use this month's income as the default to rollover.
+      // If that's already been set, use the remaining budget surplus.
+      const income = await spreadsheet.get(sheetName, 'total-income');
+      const buffered = await spreadsheet.get(sheetName, 'buffered');
+      if (income.value - buffered.value > 0) {
+        setAmount(integerToCurrency(income.value - buffered.value));
+      } else {
+        const node = await spreadsheet.get(sheetName, 'to-budget');
+        setAmount(integerToCurrency(Math.max(node.value as number, 0)));
+      }
     })();
   }, []);
 
