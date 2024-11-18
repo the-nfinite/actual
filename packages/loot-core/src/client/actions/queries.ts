@@ -102,6 +102,13 @@ export function applyBudgetAction(month, type, args) {
         });
         break;
       }
+      case 'zero-balance': {
+        await send('budget/zero-balance', {
+          month,
+          category: args.category,
+        });
+        break;
+      }
       case 'apply-single-category-template':
         await send('budget/apply-single-template', {
           month,

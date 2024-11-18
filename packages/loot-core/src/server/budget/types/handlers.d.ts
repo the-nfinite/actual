@@ -84,6 +84,11 @@ export interface BudgetHandlers {
     category: string; //category id
   }) => Promise<void>;
 
+  'budget/zero-balance': (arg: {
+    month: string;
+    category: string; //category id
+  }) => Promise<void>;
+
   'budget/apply-multiple-templates': (arg: {
     month: string;
     categoryIds: string[];

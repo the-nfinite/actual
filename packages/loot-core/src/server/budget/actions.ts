@@ -386,6 +386,18 @@ export async function resetHold({ month }: { month: string }): Promise<void> {
   await setBuffer(month, 0);
 }
 
+export async function balanceCategoryToZero({ month, category }) {
+  let sheetName = monthUtils.sheetForMonth(month);
+  let curBudgeted = await getSheetValue(sheetName, 'budget-' + category);
+  let leftover = await getSheetValue(sheetName, 'leftover-' + category);
+
+  await setBudget({
+    category: category,
+    month,
+    amount: curBudgeted - leftover,
+  });
+}
+
 export async function coverOverspending({
   month,
   to,
