@@ -31,6 +31,7 @@ export const BudgetCategories = memo(
     onApplyBudgetTemplatesInGroup,
     onReorderCategory,
     onReorderGroup,
+    onShowCategoryTransactions,
   }) => {
     const [collapsedGroupIds = [], setCollapsedGroupIdsPref] =
       useLocalPref('budget.collapsed');
@@ -266,6 +267,7 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  onShowCategoryTransactions={onShowCategoryTransactions}
                 />
               );
               break;
@@ -313,6 +315,7 @@ export const BudgetCategories = memo(
                   onReorder={onReorderCategory}
                   onBudgetAction={onBudgetAction}
                   onShowActivity={onShowActivity}
+                  onShowCategoryTransactions={onShowCategoryTransactions}
                 />
               );
               break;
